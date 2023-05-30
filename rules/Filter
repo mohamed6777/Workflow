@@ -1,0 +1,13 @@
+configfile:"config.yaml"
+rule all:
+	input:
+		expand("variants_filtered/{dataset}.fil.vcf", dataset=config["datasets"])
+rule filtered_variants:
+    input:
+        "variants/{dataset}.vcf"
+    output:
+        "variants_filtered/{dataset}.fil.vcf"
+    shell:
+       "snpEff -Xmx8g -v hg19kg {input} | "
+       "SnpSift annotate -exists -v gnomad gnomad/gnomad.exomes.r2.0.2.sites.vcf.gz /dev/stdin | "
+       "SnpSift filter -n ' (exists ID) & !( ID = 'gnomad' )' /dev/stdin > {output}"

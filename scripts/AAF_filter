@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import vcf
+
+# Reading the vcf file
+vcf_reader = vcf.Reader(filename="variants/EU006667.vcf")
+
+# Open a new vcf file to write the filtered variants
+with open("try1/filtered.vcf", "w") as filtered_file:
+    # Create a vcf writer
+    vcf_writer = vcf.Writer(filtered_file, vcf_reader)
+
+    # Loop through the variants
+    for record in vcf_reader:
+        # Get the DP and AO values
+        DP = record.INFO.get("DP")
+        AO = record.INFO.get("AO")
+
+        # Check if the DP and AO values are available
+        if DP is not None and AO is not None:
+            # Calculate the AAF
+            aaf = AO/DP
+
+            # Check if the AAF value is greater than 0.05
+            if aaf > 0.05:
+                # Write the variant to the filtered vcf file
+                vcf_writer.write_record(record)
+
+# Close the vcf writer
+vcf_writer.close()
